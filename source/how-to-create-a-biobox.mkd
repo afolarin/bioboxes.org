@@ -61,8 +61,8 @@ allow you to test that the internals are correct.
 docker run --interactive --tty velvet /bin/bash
 ~~~
 
-This is specifies you want to log into a velvet container interactively and run
-the command `/bin/bash`. When you run this you should a prompt inside your
+This specifies that you want to log into a velvet container interactively and run
+the command `/bin/bash`. When you run this you should get a prompt inside your
 container. You can test that velvet is available:
 
 ~~~ shell
@@ -107,7 +107,7 @@ available for the [biobox file validator][validator].
 
 [validator]: /validate-biobox-file/
 
-### Example
+## Example
 
 The velvet example works with just the provided FASTQ type. The above
 Dockerfile together with the `file-validator` looks like this:
@@ -120,12 +120,12 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
     velvet wget zx-utils
 
-# Locations for biobox validator
+### Locations for biobox validator
 ENV BASE_URL  https://s3-us-west-1.amazonaws.com/bioboxes-tools/validate-biobox-file
 ENV VERSION   0.x.y
 ENV VALIDATOR /biobox-validator
 
-# Install the biobox file validator
+### Install the biobox file validator
 RUN mkdir ${VALIDATOR}
 RUN wget \
       --quiet \
@@ -136,7 +136,7 @@ RUN wget \
       --strip-components=1
 ENV PATH ${PATH}:${VALIDATOR}
 
-# Fetch the schema file
+### Fetch the schema file
 RUN wget \
     --output-document /schema.yaml
     https://raw.githubusercontent.com/bioboxes/rfc/master/container/short-read-assembler/input_schema.yaml
@@ -164,12 +164,12 @@ default: velveth ${TMP_DIR} 31 -fastq.gz ${READS} && velvetg ${TMP_DIR} -cov_cut
 
 ## Putting everything together
 
-Now that we have specified our tasks, integrated the file-validator, we will
+Now that we have specified our task, integrated the file-validator, we will
 write a script to combine everything. This script will do the following:
 
-  1. Check if the provided biobox.yaml is the correct format using the
+  1. Check if the provided biobox.yaml is in the correct format using the
      file-validator.
-  2. Runs the specified task.
+  2. Run the specified task.
   3. Generate an output YAML file and return the assembled contigs. 
 
 ~~~shell
@@ -213,33 +213,34 @@ arguments:
 EOF
 ~~~
 
-This script first checks the given `/bbx/input/biobox.yaml` file with the
-`validate-biobox-file`. Next `yaml2json` is used to transform the YAML to JSON
+The first part of the script checks the given `/bbx/input/biobox.yaml` file with the
+`validate-biobox-file` binary. It is recommended to use the validate-biobox-file binary 
+to check the yaml provided to your container. Next `yaml2json` is used to transform the YAML to JSON
 and the [jq][] tool fetches the paths of the FASTQ entries. Once we have the
 paths to the fastq files, one of the task methods is called. On successful run
 a bioboxes.yaml is created as specified in the [outputs][] section.
 
-## Test it
+## Run and validate your Biobox
 
-The last step is now to check if your created container follows the bioboxes
-specification. In our [bioboxes assembler validator][] section see how to
-validate your container.
+The section "[how to use your biobox][]" shows an example of how to execute your biobox on the 
+command line with an input yaml file example. 
+
+The last step is to check if your created image follows the bioboxes specification.
+In our [bioboxes assembler validator][] section you can see how to validate your container.
+
+The following example shows how to run the test on the "bioboxes/velvet" image with the "default" task.
 
 ~~~ shell
-# Fetch an example assembler biobox for testing
-git clone git@github.com:bioboxes/velvet.git
+# Fetch the latest 0.1.x release of the validator
+wget https://s3-us-west-1.amazonaws.com/bioboxes-tools/validate-short-read-assembler/0.1.x/validate-short-read-assembler.tar.gz
+tar xzf validate-short-read-assembler.tar.gz
 
-docker run \
-  --privileged \
-  --rm \
-  --env IMAGE=velvet \
-  --env TASK=default \
-  --volume $(pwd)/velvet:/build \
-  bioboxes/validator-short-read-assembler
+./validate-short-read-assembler/validate bioboxes/velvet default
 ~~~
 
 You can find the final [biobox velvet][] example in our Github repository.
 
+[how to use your biobox]:http://bioboxes.org/guide/user/using-a-biobox/
 [jq]:http://stedolan.github.io/jq/
 [bioboxes assembler validator]:http://bioboxes.org/validator/short-read-assembler/
 [biobox velvet]:https://github.com/bioboxes/velvet
