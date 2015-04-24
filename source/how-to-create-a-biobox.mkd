@@ -3,7 +3,7 @@
 Bioboxes provides an interface definition to allow Docker containers of the
 same type to be interchangeable. This page provides a step by step description
 for creating a simple biobox. This guide provides instructions for creating an
-assembler biobox for version 0.9.0+. This guide requires you have familiarity
+assembler biobox for version 0.9.0+ and requires you have familiarity
 with [unix commands][] and [Docker][].
 
 [unix commands]: http://en.wikipedia.org/wiki/List_of_Unix_commands
